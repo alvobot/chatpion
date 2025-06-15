@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  chatpion:
+    build: .
+    container_name: chatpion-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=chatpion
+      - DB_PASS=chatpion_secure_pass_2024
+      - DB_NAME=chatpion_db
+      - APP_URL=http://localhost:8080
+    volumes:
+      - ./upload:/var/www/html/upload
+      - ./upload_caster:/var/www/html/upload_caster
+      - ./download:/var/www/html/download
+      - chatpion_cache:/var/www/html/application/cache
+    depends_on:
+      - mysql
+    networks:
+      - chatpion-network
+
+  mysql:
+    image: mysql:5.7
+    container_name: chatpion-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_secure_pass_2024
+      - MYSQL_DATABASE=chatpion_db
+      - MYSQL_USER=chatpion
+      - MYSQL_PASSWORD=chatpion_secure_pass_2024
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - chatpion-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: chatpion-phpmyadmin
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=chatpion
+      - PMA_PASSWORD=chatpion_secure_pass_2024
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - chatpion-network
+
+volumes:
+  mysql_data:
+  chatpion_cache:
+
+networks:
+  chatpion-network:
+    driver: bridge
